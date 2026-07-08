@@ -66,19 +66,42 @@ Planned 5 task(s) starting at 07:30, within 70 available minutes.
 
 ## 🧪 Testing PawPal+
 
+Run the tests from the project folder with:
+
 ```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
+python -m pytest tests/test_pawpal.py -v
 ```
 
-Sample test output:
+The tests check the main things the scheduler is supposed to do. First they
+make sure the basics work, like marking a task done and adding a task to a pet.
+Then they check the trickier stuff: that sorting puts tasks in the right time
+order, that finishing a daily task makes a new task for the next day, and that
+the scheduler notices when two tasks are booked for the same time.
+
+Here is what it looks like when all the tests pass:
 
 ```
-# Paste your pytest output here
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\kuwam\AppData\Local\Python\pythoncore-3.14-64\python.exe
+cachedir: .pytest_cache
+rootdir: c:\Users\kuwam\Documents\ai110-module2show-pawpal-starter
+plugins: anyio-4.14.0
+collecting ... collected 5 items
+
+tests/test_pawpal.py::test_mark_complete_changes_status PASSED           [ 20%]
+tests/test_pawpal.py::test_adding_task_increases_pet_task_count PASSED   [ 40%]
+tests/test_pawpal.py::test_sort_returns_pinned_tasks_in_chronological_order PASSED [ 60%]
+tests/test_pawpal.py::test_completing_daily_task_creates_task_for_next_day PASSED [ 80%]
+tests/test_pawpal.py::test_conflict_detection_flags_duplicate_times PASSED [100%]
+
+============================== 5 passed in 0.54s ==============================
 ```
+
+**Confidence level: ⭐⭐⭐⭐⭐ (5/5)**
+
+All 5 tests pass, and they cover the most important scheduling behaviors
+(sorting, recurring tasks, and conflict detection), so I feel really good about
+how reliable the system is.
 
 ## 📐 Smarter Scheduling
 
