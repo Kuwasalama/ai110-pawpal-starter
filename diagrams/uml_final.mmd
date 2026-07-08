@@ -1,0 +1,56 @@
+classDiagram
+    %% PawPal+ — smart pet care planner (FINAL, matches pawpal_system.py)
+    %% Four core classes: Owner, Pet, Task, Scheduler
+    %% Module-level helpers (not class methods): is_valid_time(hhmm) bool,
+    %% _to_minutes(hhmm) int, _to_hhmm(total_minutes) str
+
+    class Owner {
+        +str name
+        +list~str~ preferred_times
+        +int available_minutes
+        +list~Pet~ pets
+        +add_pet(pet) None
+        +day_start() int
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +str breed
+        +int age
+        +list~Task~ tasks
+        +add_task(task) None
+        +complete_task(task) Task|None
+    }
+
+    class Task {
+        +str title
+        +int duration_minutes
+        +str priority
+        +str time
+        +str frequency
+        +date due_date
+        +str category
+        +bool completed
+        +priority_rank() int
+        +next_occurrence() Task|None
+        +mark_complete() Task|None
+    }
+
+    class Scheduler {
+        +Owner owner
+        +list~Task~ tasks
+        +list~Task~ skipped
+        +collect_tasks() list~Task~
+        +generate_schedule() list~dict~
+        +sort_by_priority() list~Task~
+        +filter_tasks(completed, pet_name) list~Task~
+        +fits_in_time(task, remaining_minutes) bool
+        +detect_conflicts() str
+        +explain() str
+    }
+
+    Owner "1" --> "*" Pet : owns
+    Pet "1" --> "*" Task : needs
+    Scheduler "1" --> "1" Owner : plans for
+    Scheduler ..> Task : schedules

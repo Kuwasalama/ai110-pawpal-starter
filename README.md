@@ -22,6 +22,28 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## ✨ Features
+
+PawPal+ is more than a to-do list — the `Scheduler` runs real algorithms to
+build the day:
+
+- **Priority sorting** — flexible tasks are ordered highest priority first, with
+  longer tasks breaking ties, so the important stuff lands first.
+- **Sorting by time (pinned tasks)** — a task given a set `HH:MM` jumps to the
+  front and is placed at that exact time, ahead of anything flexible.
+- **Time-fitting & shortening** — the planner tracks the minutes you have left;
+  a task that doesn't fully fit is *shortened* if at least half its time is
+  free, otherwise it's left off (and reported, never hidden).
+- **Conflict warnings** — if two pinned tasks overlap, PawPal+ flags exactly
+  which tasks clash (same pet or different pets) without changing the plan.
+- **Daily / weekly recurrence** — completing a repeating task auto-creates its
+  next occurrence with the due date advanced by one day or week.
+- **Filtering** — narrow tasks by completion status and/or pet name.
+- **Time validation** — owner-entered times are checked as real 24-hour `HH:MM`
+  values before they reach the scheduler.
+- **Plain-language explanations** — every plan comes with a `why`: when each
+  task was placed, the reason, and what got left off.
+
 ## Getting started
 
 ### Setup
@@ -128,12 +150,97 @@ always leads, and the rest fall into "most important, then longest" order.
 
 ## 📸 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+### What you can do in the app (`app.py`)
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+The Streamlit UI walks top to bottom:
+
+- **Owner** — enter your name, minutes available today, and a preferred start time.
+- **Pets** — add pets (name + species); they persist as you go and show in a table.
+- **Tasks** — for each pet, add a task with a title, duration, priority, and an
+  optional pinned `HH:MM` time. Bad times are rejected with a clear message.
+- **Build Schedule** — one button turns everything into a planned day: a conflict
+  warning (if any), the ordered schedule table, a note of anything left off, and a
+  plain-language "Why this plan?" explanation.
+
+### Example workflow
+
+1. Set the owner to **Jordan**, `70` minutes available, start time `07:30`.
+2. Add a pet: **Biscuit** (dog). Add another: **Mochi** (cat).
+3. Give Biscuit a `Morning walk` (30 min, high) and Mochi a `Give meds`
+   (5 min, high) pinned to `09:00`.
+4. Click **Generate schedule** and read today's plan.
+
+### Key Scheduler behaviors you'll see
+
+- **Sorting** — the pinned `09:00` task leads the day; flexible tasks follow by
+  priority, longest first.
+- **Conflict warnings** — two tasks both pinned to `09:00` trigger a warning
+  naming both tasks.
+- **Shortening / left off** — when time runs out, a task is shortened to use the
+  last free minutes, and anything that can't fit at least halfway is listed as
+  left off.
+- **Recurrence** — completing a daily task queues tomorrow's copy automatically.
+
+### Sample CLI output (`python main.py`)
+
+The logic layer also runs standalone. `main.py` builds an owner with two pets and
+several tasks (added out of order on purpose, with a deliberate 09:00 conflict) to
+show the sorting, filtering, recurrence, and conflict detection by eye:
+
+```
+Recurring task demo:
+  Before: Biscuit has 4 tasks; 'Evening walk' due 2026-07-08 (daily).
+  Completed 'Evening walk' — completed=True.
+  After: Biscuit has 5 tasks; next 'Evening walk' auto-created for 2026-07-09.
+
+⚠ Schedule conflict detected:
+  - 'Vet call' (Biscuit, 09:00–09:15) overlaps 'Give meds' (Mochi, 09:00–09:05) [different pets]
+
+Planning order (sort_by_priority):
+  Vet call @09:00 — high, 15 min
+  Give meds @09:00 — high, 5 min
+  Morning walk — high, 30 min
+  Feeding — high, 10 min
+  Evening walk — medium, 25 min
+  Evening walk — medium, 25 min
+  Clean litter — medium, 15 min
+  Playtime — low, 20 min
+
+Not yet done (filter_tasks completed=False):
+  Morning walk
+  Vet call
+  Evening walk
+  Playtime
+  Give meds
+
+Already done (filter_tasks completed=True):
+  Feeding
+  Evening walk
+  Clean litter
+
+Mochi's tasks (filter_tasks pet_name='Mochi'):
+  Playtime
+  Clean litter
+  Give meds
+
+Mochi's unfinished tasks (both filters):
+  Playtime
+  Give meds
+
+Today's schedule for Jordan:
+  09:00 — Vet call (15 min) [priority: high]
+  09:15 — Give meds (5 min) [priority: high]
+  09:20 — Morning walk (30 min) [priority: high]
+  09:50 — Feeding (10 min) [priority: high]
+  10:00 — Clean litter (10 of 15 min, shortened) [priority: medium]
+
+Planned 5 task(s) starting at 07:30, within 70 available minutes.
+  09:00 — Vet call (high priority; owner set it for 09:00)
+  09:15 — Give meds (high priority; owner set it for 09:00)
+  09:20 — Morning walk (high priority; fit in the 50 min still free)
+  09:50 — Feeding (high priority; fit in the 20 min still free)
+  10:00 — Clean litter (medium priority; shortened to 10 of 15 min to use the time left)
+Left off (less than half their time was free): Evening walk, Evening walk, Playtime.
+```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

@@ -133,10 +133,16 @@ if st.button("Generate schedule"):
     scheduler = Scheduler(owner)
 
     # Warn about overlapping pinned times before showing the plan. This only
-    # flags the clash; the schedule is still built.
+    # flags the clash; the schedule is still built. We lead with a friendly,
+    # plain-language explanation so the owner knows what to do, then show the
+    # specific overlaps underneath.
     conflict_warning = scheduler.detect_conflicts()
     if conflict_warning:
-        st.warning(conflict_warning)
+        st.warning(
+            "⚠️ **Two tasks are booked for the same time.** PawPal+ will still "
+            "plan them, but your pet can't be in two places at once — you may "
+            "want to move one to a different time.\n\n" + conflict_warning
+        )
 
     plan = scheduler.generate_schedule()
 
@@ -156,5 +162,14 @@ if st.button("Generate schedule"):
                 for entry in plan
             ]
         )
+        # Surface what got left off so nothing disappears silently. The
+        # scheduler records these on `skipped` during generate_schedule().
+        if scheduler.skipped:
+            left_off = ", ".join(task.title for task in scheduler.skipped)
+            st.info(
+                f"Left off (less than half their time was free): {left_off}. "
+                "Add more available time to fit them in."
+            )
+
         st.subheader("Why this plan?")
         st.text(scheduler.explain())

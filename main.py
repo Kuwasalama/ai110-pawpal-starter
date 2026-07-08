@@ -5,9 +5,15 @@ order, then prints the sorted plan and a few filtered views to the terminal
 so we can verify the sorting and filtering methods by eye.
 """
 
+import sys
 from datetime import date
 
 from pawpal_system import Owner, Pet, Scheduler, Task
+
+# The plan output uses a few non-ASCII characters (the ⚠ conflict flag, em
+# dashes). Windows terminals default to cp1252, which can't encode those and
+# would crash with UnicodeEncodeError, so force UTF-8 output here.
+sys.stdout.reconfigure(encoding="utf-8")
 
 
 def main() -> None:
