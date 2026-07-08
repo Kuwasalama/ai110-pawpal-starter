@@ -44,15 +44,25 @@ pip install -r requirements.txt
 
 ## 🖥️ Sample Output
 
-Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
+Here "Give meds" was pinned to 09:00, so it leads the day and the rest fall in
+behind it by priority; "Playtime" is shortened to use up the last of the time.
 
 ```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+Today's schedule for Jordan:
+  09:00 — Give meds (5 min) [priority: high]
+  09:05 — Morning walk (30 min) [priority: high]
+  09:35 — Feeding (10 min) [priority: high]
+  09:45 — Clean litter (15 min) [priority: medium]
+  10:00 — Playtime (10 of 20 min, shortened) [priority: low]
+
+Planned 5 task(s) starting at 07:30, within 70 available minutes.
+  09:00 — Give meds (high priority; owner set it for 09:00)
+  09:05 — Morning walk (high priority; fit in the 65 min still free)
+  09:35 — Feeding (high priority; fit in the 35 min still free)
+  09:45 — Clean litter (medium priority; fit in the 25 min still free)
+  10:00 — Playtime (low priority; shortened to 10 of 20 min to use the time left)
 ```
+
 
 ## 🧪 Testing PawPal+
 
@@ -72,14 +82,26 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+Beyond a basic to-do list, PawPal+ makes several scheduling decisions on the
+owner's behalf. Each feature below names the method that implements it.
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.sort_by_priority()`, `Task.priority_rank()` | Highest priority first; ties broken by longest duration. |
+| Owner-pinned / important tasks | `Scheduler.sort_by_priority()`, `Scheduler.generate_schedule()` | A task given a set `time` (or flagged as important) jumps to the front and is placed at that time, even if it's shorter than tasks that would normally go first. |
+| Fitting tasks to available time | `Scheduler.generate_schedule()`, `Scheduler.fits_in_time()` | Tracks remaining minutes as it plans; a task that doesn't fully fit is *shortened* if at least half its time is free, otherwise left off (and reported, never hidden). |
+| Filtering | `Scheduler.filter_tasks()` | Narrow tasks by completion status and/or pet name; both filters optional. |
+| Conflict detection | `Scheduler.detect_conflicts()` | Flags overlapping owner-pinned times (same pet or different pets) and returns a warning message. Advisory only — it never changes the plan. |
+| Recurring tasks | `Task.next_occurrence()`, `Task.mark_complete()`, `Pet.complete_task()` | Completing a daily/weekly task auto-creates the next instance with its due date advanced via `timedelta`. |
+| Time validation | `is_valid_time()` | Checks that owner-entered times are real 24-hour `HH:MM` values before they reach the scheduler. |
+| Plain-language plan | `Scheduler.explain()` | Explains what was scheduled, when, why, and what got left off. |
+
+### How the sorting works
+
+`sort_by_priority()` builds one sort key per task: owner-pinned tasks sort to
+the front (earliest set time first), and everything else follows the priority
+rank, with longer tasks breaking ties. So a specific-time or important task
+always leads, and the rest fall into "most important, then longest" order.
 
 ## 📸 Demo Walkthrough
 

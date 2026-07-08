@@ -18,15 +18,21 @@ classDiagram
         +int age
         +list~Task~ tasks
         +add_task(task) None
+        +complete_task(task) Task
     }
 
     class Task {
         +str title
         +int duration_minutes
         +str priority
+        +str time
+        +str frequency
+        +date due_date
         +str category
-        +bool recurring
+        +bool completed
         +priority_rank() int
+        +next_occurrence() Task
+        +mark_complete() Task
     }
 
     class Scheduler {
@@ -34,7 +40,9 @@ classDiagram
         +list~Task~ tasks
         +generate_schedule() list~dict~
         +sort_by_priority() list~Task~
+        +filter_tasks(completed, pet_name) list~Task~
         +fits_in_time(task) bool
+        +detect_conflicts() str
         +explain() str
     }
 
